@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website</title>
+</head>
+<body>
+    <h1>Register Member</h1>
+    <form action="http://localhost:5000" method="POST">
+        <div>
+          <label for="name">Your Name:</label>
+          <input name="name" id="name" value="" />
+        </div>
+        <div>
+          <label for="email">Your email:</label>
+          <input name="email" id="email" value="" />
+        </div>
+        <div>
+          <button>Register</button>
+        </div>
+      </form>
+      <br>
+      <br>
+      <h1>Update Member</h1>
+      <form id="update" action="http://localhost:5000/" method="POST">
+        <div>
+          <label for="id">Update Member with id:</label>
+          <input name="id" id="id" value="" />
+        </div>
+        <div>
+          <label for="name">Your Name:</label>
+          <input name="name" id="name" value="" />
+        </div>
+        <div>
+          <label for="email">Your email:</label>
+          <input name="email" id="email" value="" />
+        </div>
+        <div>
+          <button onclick="document.getElementById('update').action = 'http://localhost:5000/api/members/' + document.getElementById('id').value + '/update';">Update</button>
+        </div>
+      </form>
+      <br>
+      <br>
+      <h1>Delete Member</h1>
+      <form id="delete" action="http://localhost:5000/" method="POST">
+        <div>
+          <label for="deleteid">Delete Member with id:</label>
+          <input name="deleteid" id="deleteid" value="" />
+        </div>
+        <div>
+          <button onclick="document.getElementById('delete').action = 'http://localhost:5000/api/members/' + document.getElementById('deleteid').value + '/delete';">Delete Member</button>
+        </div>
+      </form>
+</body>
+</html>
