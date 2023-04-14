@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const moment = require("moment");
-const fs = require('fs');
 const mongoose  = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
@@ -67,7 +66,8 @@ connectDatabase();
 
 //Middelware
 const logger = (req, res, next) => {
-    console.log(`${moment().format()}: ${req.protocol}://${req.get("host")}${req.originalUrl}`);
+    var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || null;
+    console.log(`${ip} ${moment().format()}: ${req.protocol}://${req.get("host")}${req.originalUrl}`);
     next();
 };
 
@@ -179,14 +179,6 @@ const PORT = 5000;
 
 app.listen(PORT, async () => {
     console.log(`Server started on port ${PORT}`);
-
-    fs.readFile('./users.txt', 'utf8', (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        users = JSON.parse(data);
-      });
 
     var isValid = await Data.findOne({ name: "data"});
 
