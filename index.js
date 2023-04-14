@@ -1,7 +1,23 @@
+require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const moment = require("moment");
 const fs = require('fs');
+const mongoose  = require("mongoose");
+
+const UserSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    data: {
+        type: String,
+        required: true
+    }
+});
+
+const Data = mongoose.model("Data", UserSchema);
+
 var users = {
     "abc": {
         "registered": 1681310602449,
@@ -29,6 +45,25 @@ var users = {
 
 
 const app = express();
+
+// DB Config
+const db = process.env.MONGO_URI;
+
+
+const connectDatabase = async () => {
+    try {
+        console.log("Trying to connect to mongo");
+        await mongoose.connect(db, { useNewUrlParser: true })
+    
+        console.log("MongoDB connected...");
+      } catch (error) {
+        console.log(error);
+        //process.exit(1);
+        setTimeout(connectDatabase, 1000);
+      }
+}
+
+connectDatabase();
 
 //Middelware
 const logger = (req, res, next) => {
@@ -105,7 +140,7 @@ app.post("/gethistory", (req, res) =>{
 });
 
 //Add emotions to users history
-app.post("/addemotions", (req, res) =>{
+app.post("/addemotions", async (req, res) =>{
     var password = req.body.password;
     var data = req.body.data;
 
@@ -113,12 +148,19 @@ app.post("/addemotions", (req, res) =>{
 
         users[password]["history"].unshift(data)
 
-        var writeStr = JSON.stringify(users)
-        fs.writeFile('./users.txt', writeStr, err => {
-            if (err) {
-                console.error(err);
-            }
-        });
+        var isValid = await Data.findOne({ name: "data"});
+
+        if (isValid) {
+            var filter = { name: "data" };
+            var update = { data: JSON.stringify(users)  };
+            var updated = await Data.findOneAndUpdate(filter, update, {
+                new: true
+            });
+            console.log("Saved added emotion to database.")
+        }
+        else {
+            console.log("An error occured while saving data to database.");
+        }
 
         res.json(true);
     }
@@ -135,7 +177,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server started on port ${PORT}`);
 
     fs.readFile('./users.txt', 'utf8', (err, data) => {
@@ -145,4 +187,16 @@ app.listen(PORT, () => {
         }
         users = JSON.parse(data);
       });
+
+    var isValid = await Data.findOne({ name: "data"});
+
+    if (isValid) {
+        users = JSON.parse(isValid.data);
+        console.log("Data loaded successfully.");
+        console.log(users);
+    }
+    else {
+        console.log("An error occured while loading data from database.");
+    }
+
 });
